@@ -1,0 +1,25 @@
+# Imagem base
+FROM python:3.11-slim
+
+# Definir diretório de trabalho
+WORKDIR /code
+
+# Instalar dependências do sistema
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar requirements e instalar
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar código do projeto
+COPY . /code/
+
+# Copiar o script de espera do banco
+COPY wait-for-db.sh /code/
+
+# CMD: usar sh para rodar o script
+CMD ["sh", "./wait-for-db.sh", "db", "python", "manage.py", "runserver", "0.0.0.0:8000"]

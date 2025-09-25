@@ -1,0 +1,16 @@
+# Django
+Django>=4.2,<5.0
+
+# Banco de dados PostgreSQL
+psycopg2-binary>=2.9
+
+# Cache Redis
+redis>=5.0
+
+# Gunicorn (produção)
+gunicorn>=21.2
+
+# Ambientes de desenvolvimento
+ipython>=8.0           # shell interativo opcional
+django-debug-toolbar>=4.0  # depuração no dev
+python-dotenv>=1.0      # ler .env local
