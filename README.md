@@ -33,7 +33,7 @@ Este projeto é uma API RESTful para servir como gateway de pagamento e realizar
 1.  **Clone o repositório:**
 
     ```bash
-    git clone <URL_DO_REPOSITORIO>
+    git clone https://github.com/Olival42/api_pagamento_frete.git
     cd api-pagamento-frete
     ```
 
