@@ -4,9 +4,11 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile.${ENV}  # Escolhe dev ou prod pelo .env
+      dockerfile: Dockerfile.${ENV}
     container_name: api-pagamento-frete
-    command: sh ./wait-for-db.sh db python manage.py runserver 0.0.0.0:8000
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:${PORT}"
     volumes:
       - .:/code
     ports:
@@ -14,8 +16,10 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   db:
     image: postgres:17
@@ -28,6 +32,12 @@ services:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
 
   redis:
     image: redis:7
