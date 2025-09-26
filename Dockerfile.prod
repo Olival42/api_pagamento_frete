@@ -1,4 +1,3 @@
-# Imagem base
 FROM python:3.11-slim
 
 WORKDIR /code
@@ -13,7 +12,5 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /code/
-COPY wait-for-db.sh /code/
 
-# Usar Gunicorn em produção, com espera pelo banco
-CMD ["sh", "./wait-for-db.sh", "db", "gunicorn", "api_pagamento_frete.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["sh", "-c", "python manage.py migrate && gunicorn api_pagamento_frete.wsgi:application --bind 0.0.0.0:${PORT}"]
