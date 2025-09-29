@@ -20,8 +20,8 @@ REDIS_DB = os.getenv("REDIS_DB")
 
 r = redis.Redis(host=str(REDIS_HOST), port=int(REDIS_PORT), db=int(REDIS_DB)) 
 
-MAX_LOGIN_ATTEMPTS = 5 
-LOCK_TIME_SECONDS = 300
+MAX_LOGIN_ATTEMPTS = int(os.getenv("MAX_LOGIN_ATTEMPTS")) 
+LOCK_TIME_SECONDS = int(os.getenv("LOCK_TIME_SECONDS"))
 
 class UserService:
     def __init__(self, user_repo: IUserRepository, blacklist_repo: IBlacklistRepository):
@@ -34,7 +34,21 @@ class UserService:
         
         user = User(id=None, name=name, email=email, password=password)
         
-        return self.user_repo.save(user)
+        access_token = create_access_token(user.id, user.email)
+        refresh_token = create_refresh_token(user.id, user.email)
+        
+        saved_user = self.user_repo.save(user)
+        
+        expires_at = decode_token(access_token)["exp"]
+        
+        return {
+            "id": saved_user.id,
+            "name": saved_user.name,
+            "email": saved_user.email,
+            "access": access_token,
+            "refresh": refresh_token,
+            "expires_at": expires_at
+        }
 
     def login_user(self, email: str, password: str) -> dict: 
         user = self.user_repo.find_by_email(email) 
@@ -56,7 +70,17 @@ class UserService:
         access_token = create_access_token(user.id, user.email) 
         refresh_token = create_refresh_token(user.id, user.email) 
         
-        return {"user": user, "access": access_token, "refresh": refresh_token}
+        payload = decode_token(access_token)
+        expires_at = payload["exp"]
+        
+        return {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "access": access_token,
+            "refresh": refresh_token,
+            "expires_at": expires_at
+        }
     
     def logout(self, access_token: str, refresh_token: str = None) -> dict:
         try:

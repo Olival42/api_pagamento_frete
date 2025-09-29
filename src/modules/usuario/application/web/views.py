@@ -21,11 +21,10 @@ class RegisterView(APIView):
             context={"user_service": user_service}
         )
         if serializer.is_valid():
-            user = serializer.save()
-            return Response(
-                {"id": user.id, "name": user.name, "email": user.email},
-                status=status.HTTP_201_CREATED
-            )
+            user_data = serializer.save()
+
+            return Response(user_data, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
@@ -33,14 +32,7 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data, context={"user_service": user_service})
         if serializer.is_valid():
             result = serializer.validated_data
-            user = result["user"]
-            return Response({
-                "id": user.id,
-                "name": user.name,
-                "email": user.email,
-                "access": result["access"],
-                "refresh": result["refresh"]
-            }, status=status.HTTP_200_OK)
+            return Response(result, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class LogoutView(APIView):
