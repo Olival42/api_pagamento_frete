@@ -24,7 +24,7 @@ class User:
 
     def set_password(self, password: str):
         if len(password) < 8:
-            raise ValueError("Senha precisa ter pelo menos 6 caracteres")
+            raise ValueError("Senha precisa ter pelo menos 8 caracteres")
         if not re.search(r"[A-Z]", password):
             raise ValueError("Senha precisa ter pelo menos uma letra maiúscula")
         if not re.search(r"\d", password):

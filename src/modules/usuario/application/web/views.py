@@ -46,26 +46,29 @@ class LoginView(APIView):
 class LogoutView(APIView):
     def post(self, request):
         auth_header = request.headers.get("Authorization")
+        refresh_token = request.data.get("refresh")
+        
         if not auth_header or not auth_header.startswith("Bearer "):
-            return Response({"detail": "Token não informado"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Access token não informado"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not refresh_token:
+            return Response({"detail": "Refresh token obrigatório"}, status=status.HTTP_400_BAD_REQUEST)
 
-        token = auth_header.split()[1]
-        result = user_service.logout(token)
+        access_token = auth_header.split()[1]
+
+        result = user_service.logout(access_token, refresh_token)
 
         if "Logout realizado" in result["detail"]:
             return Response(result, status=status.HTTP_200_OK)
         return Response(result, status=status.HTTP_400_BAD_REQUEST)
     
-""" class TestProtectedView(APIView):
-    def get(self, request):
-        auth_header = request.headers.get("Authorization")
-        if not auth_header or not auth_header.startswith("Bearer "):
-            return Response({"detail": "Token não informado"}, status=status.HTTP_401_UNAUTHORIZED)
-
-        token = auth_header.split()[1]
-
-        try:
-            payload = user_service.authenticate(token)
-            return Response({"usuario": payload["email"], "user_id": payload["user_id"]})
-        except ValueError as e:
-            return Response({"detail": str(e)}, status=status.HTTP_401_UNAUTHORIZED) """
+class RefreshTokenView(APIView): 
+    def post(self, request): 
+        refresh_token = request.data.get("refresh") 
+        if not refresh_token: 
+            return Response({"detail": "Refresh token não informado"}, status=status.HTTP_400_BAD_REQUEST) 
+        try: 
+            result = user_service.refresh_access_token(refresh_token) 
+            return Response(result, status=status.HTTP_200_OK) 
+        except ValueError as e: 
+            return Response({"detail": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
