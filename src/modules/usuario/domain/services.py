@@ -42,9 +42,11 @@ class UserService:
         expires_at = decode_token(access_token)["exp"]
         
         return {
-            "id": saved_user.id,
-            "name": saved_user.name,
-            "email": saved_user.email,
+            "user": {
+                "id": saved_user.id,
+                "name": saved_user.name,
+                "email": saved_user.email
+            },
             "access": access_token,
             "refresh": refresh_token,
             "expires_at": expires_at
@@ -74,9 +76,11 @@ class UserService:
         expires_at = payload["exp"]
         
         return {
-            "id": user.id,
-            "name": user.name,
-            "email": user.email,
+            "user": {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email
+            },
             "access": access_token,
             "refresh": refresh_token,
             "expires_at": expires_at
